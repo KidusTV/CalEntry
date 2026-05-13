@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:workmanager/workmanager.dart';
 
+import 'core/database/app_database.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/app_router.dart';
+import 'features/steps/background/steps_sync_worker.dart';
+import 'features/water/presentation/providers/water_providers.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+  await Workmanager().registerPeriodicTask(
+    'steps-sync',
+    syncStepsTask,
+    frequency: const Duration(hours: 1),
+  );
+
   initializeDateFormatting('de_DE');
   runApp(
-    const ProviderScope(
+    ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(AppDatabase()),
+      ],
       child: PremiumTrackingApp(),
     ),
+
   );
 }
 

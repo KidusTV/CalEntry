@@ -270,16 +270,17 @@ class _OverviewSectionState extends State<OverviewSection>
                               builder: (context, _) {
                                 final current = _unitAnim.value.round();
 
-                                String text;
-                                if (widget.focusedGoal.unit.length == 1) {
-                                  if (current != 1) {
-                                    text = _oldGoal.unit.substring(0, current.clamp(0, _oldGoal.unit.length));
-                                  } else {
-                                    text = widget.focusedGoal.unit;
-                                  }
-                                }
+                                final newUnit = widget.focusedGoal.unit;
+                                final oldUnit = _oldGoal.unit;
+
+                                final useOld = newUnit.trim().length < oldUnit.length && current > newUnit.trim().length;
+
+                                final source = useOld ? oldUnit : newUnit;
+
+                                final text = source.substring(0, current.clamp(0, source.length));
+
                                 return Text(
-                                  widget.focusedGoal.unit.substring(0, current.clamp(0, widget.focusedGoal.unit.length)),
+                                  text,
                                   key: ValueKey(widget.focusedGoal.unit),
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.white.withOpacity(0.55),

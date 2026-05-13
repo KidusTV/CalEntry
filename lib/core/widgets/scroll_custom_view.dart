@@ -26,7 +26,6 @@ class ScrollCustomView extends StatelessWidget {
     children.add(SliverPadding(padding: EdgeInsets.only(bottom: padding.bottom)));
 
     return CustomScrollView(
-
       physics: const BouncingScrollPhysics(),
       slivers: children
     );

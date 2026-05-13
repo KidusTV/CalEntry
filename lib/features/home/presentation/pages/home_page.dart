@@ -63,9 +63,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void back() {
+  void toOffset(int offset) {
     _controller.animateToPage(
-      baseIndex,
+      baseIndex + offset,
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
     );
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
         child: CustomAppBar(
           title: resolveTitle(baseDate, offset),
           next: next,
-          back: back,
+          toOffset: toOffset,
           previous: previous,
         ),
       ),

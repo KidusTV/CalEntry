@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/scanner/presentation/pages/scanner_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/home',
@@ -22,6 +23,11 @@ final appRouter = GoRouter(
           path: '/scanner',
           builder: (context, state) => const ScannerPage(),
         ),
+
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsPage(),
+        )
       ]
     )
 

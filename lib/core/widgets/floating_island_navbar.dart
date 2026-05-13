@@ -1,6 +1,9 @@
 import 'dart:ui';
 
+import 'package:calentry/core/constants/app_radius.dart';
 import 'package:flutter/material.dart';
+
+import '../constants/app_spacing.dart';
 
 class FloatingIslandNavbar extends StatelessWidget {
   final int currentIndex;
@@ -19,25 +22,39 @@ class FloatingIslandNavbar extends StatelessWidget {
         padding: const EdgeInsets.only(
           left: 24,
           right: 24,
-          bottom: 14,
+          bottom: AppSpacing.md,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: 28,
-              sigmaY: 28,
-            ),
-            child: Container(
-              height: 86,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: Colors.white.withValues(alpha: 0.06),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 28,
+                  sigmaY: 28,
+                ),
+                child: Container(
+                  height: 86,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: Colors.white.withValues(alpha: 0.06),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        blurRadius: 28,
+                        offset: const Offset(0, 14),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ),
+            Container(
+              height: 86,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -67,7 +84,7 @@ class FloatingIslandNavbar extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -89,24 +106,40 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: selected
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.transparent,
-        ),
-        child: Icon(
-          icon,
-          color: selected ? Colors.white : Colors.white54,
+      child: RepaintBoundary(
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          scale: selected ? 1.15 : 1.0,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: selected
+                  ? Colors.white.withValues(alpha: 0.14)
+                  : Colors.transparent,
+            ),
+            child: Center(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 180),
+                opacity: selected ? 1.0 : 0.6,
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
+
 
 class _CenterButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -117,31 +150,47 @@ class _CenterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFFB36B),
-              Color(0xFFFF7D54),
+      child: Transform.translate(
+        offset: const Offset(0, -20),
+        child: Container(
+          width: 74,
+          height: 74,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFFC27A),
+                Color(0xFFFF6B4A),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0x55FF7A4A),
+                blurRadius: 30,
+                offset: const Offset(0, 14),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
             ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x33FF8A5B),
-              blurRadius: 24,
-              offset: Offset(0, 10),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.25),
+              ),
             ),
-          ],
-        ),
-        child: const Icon(
-          Icons.qr_code_scanner_rounded,
-          color: Colors.white,
-          size: 30,
+            child: const Icon(
+              Icons.qr_code_scanner_rounded,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
         ),
       ),
     );

@@ -1,10 +1,7 @@
-import 'package:calentry/core/widgets/app_bar.dart';
 import 'package:calentry/core/widgets/floating_island_navbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-
-import '../features/home/presentation/pages/home_page.dart';
-import '../features/scanner/presentation/pages/scanner_page.dart';
 
 class BasePage extends StatelessWidget {
   final Widget child;
@@ -23,13 +20,21 @@ class BasePage extends StatelessWidget {
       case '/scanner':
         return 2;
 
+
+      case '/settings':
+        return 4;
+
       default:
         return 0;
     }
   }
 
 
-  void _onItemTapped(BuildContext context, int index) {
+  void _onItemTapped(BuildContext context, int index, int currentIndex) {
+    HapticFeedback.lightImpact();
+
+    if (index == currentIndex) return;
+
     switch (index) {
       case 0:
         context.go('/home');
@@ -37,6 +42,10 @@ class BasePage extends StatelessWidget {
 
       case 2:
         context.push('/scanner');
+        break;
+
+      case 4:
+        context.go('/settings');
         break;
     }
   }
@@ -49,7 +58,7 @@ class BasePage extends StatelessWidget {
         extendBody: true,
         bottomNavigationBar: (currentIndex == 2) ? null : FloatingIslandNavbar(
           currentIndex: currentIndex, // unabhängig davon
-          onChanged: (index) => _onItemTapped(context, index),
+          onChanged: (index) => _onItemTapped(context, index, currentIndex),
         ),
         body: child
     );
