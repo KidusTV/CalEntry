@@ -5,8 +5,8 @@ import '../../../water/presentation/providers/water_providers.dart';
 import '../../data/datasources/local/step_local_datasource.dart';
 import '../../data/datasources/remote/health_connect_steps_datasource.dart';
 import '../../data/repositories/steps_repository_impl.dart';
+import '../../domain/entities/daily_step_stats.dart';
 import '../../domain/repositories/steps_repository.dart';
-import '../../domain/usecases/get_daily_steps_usecase.dart';
 
 final healthProvider = Provider<Health>((ref) {
   return Health();
@@ -32,19 +32,16 @@ final stepsRepositoryProvider = Provider<StepsRepository>((ref) {
   );
 });
 
-// final stepsProvider =FutureProvider.family<int, DateTime>((ref, date) async {
-//   final usecase = ref.read(getDailyStepsUseCaseProvider);
-//
-//   final result = await usecase(date);
-//
-//   return result.steps;
-// });
-final stepsProvider = StreamProvider.family<int, DateTime>((ref, date) {
-  final repo = ref.read(stepsRepositoryProvider);
-
-  return repo.watchDailySteps(date).map((e) => e?.steps ?? 0);
+/// Haupt-Provider für die Schritte eines bestimmten Tages basierend auf einem dayOffset.
+/// 0 = heute, -1 = gestern, etc.
+final dailyStepsProvider = StreamProvider.family<DailyStepStats, int>((ref, dayOffset) {
+  final date = dateForOffset(dayOffset);
+  final repo = ref.watch(stepsRepositoryProvider);
+  return repo.watchStepsForDate(date);
 });
 
-final getDailyStepsUseCaseProvider = Provider<GetDailyStepsUseCase>((ref) {
-  return GetDailyStepsUseCase(ref.read(stepsRepositoryProvider));
+/// Provider für das aktuelle Schrittziel.
+final currentStepGoalProvider = StreamProvider<int>((ref) {
+  final repo = ref.watch(stepsRepositoryProvider);
+  return repo.watchCurrentGoal();
 });

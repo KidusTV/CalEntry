@@ -1,9 +1,16 @@
 import '../entities/daily_step_stats.dart';
 
 abstract class StepsRepository {
-  Future<DailyStepStats> getDailySteps(DateTime day);
+  /// Stream der Schritte für einen bestimmten Tag.
+  /// Liefert sofort Daten aus der DB und triggert ggf. einen Sync.
+  Stream<DailyStepStats> watchStepsForDate(DateTime date);
 
-  Stream<DailyStepStats?> watchDailySteps(DateTime day);
+  /// Manueller Sync mit Health Connect.
+  Future<void> syncSteps(DateTime date);
 
-  Future<void> syncDailySteps(DateTime day);
+  /// Setzt das tägliche Schrittziel.
+  Future<void> setGoal(int steps);
+
+  /// Stream des aktuellen Schrittziels.
+  Stream<int> watchCurrentGoal();
 }

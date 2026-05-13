@@ -6,6 +6,6 @@ class SyncStepsUseCase {
   SyncStepsUseCase(this.repository);
 
   Future<void> call(DateTime day) {
-    return repository.syncDailySteps(day);
+    return repository.syncSteps(day);
   }
 }

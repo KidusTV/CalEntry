@@ -813,12 +813,261 @@ class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
   }
 }
 
+class $StepGoalsTable extends StepGoals
+    with TableInfo<$StepGoalsTable, StepGoal> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StepGoalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dailyGoalMeta = const VerificationMeta(
+    'dailyGoal',
+  );
+  @override
+  late final GeneratedColumn<int> dailyGoal = GeneratedColumn<int>(
+    'daily_goal',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10000),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, dailyGoal, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'step_goals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StepGoal> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('daily_goal')) {
+      context.handle(
+        _dailyGoalMeta,
+        dailyGoal.isAcceptableOrUnknown(data['daily_goal']!, _dailyGoalMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StepGoal map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StepGoal(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      dailyGoal: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}daily_goal'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StepGoalsTable createAlias(String alias) {
+    return $StepGoalsTable(attachedDatabase, alias);
+  }
+}
+
+class StepGoal extends DataClass implements Insertable<StepGoal> {
+  final int id;
+  final int dailyGoal;
+  final DateTime updatedAt;
+  const StepGoal({
+    required this.id,
+    required this.dailyGoal,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['daily_goal'] = Variable<int>(dailyGoal);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  StepGoalsCompanion toCompanion(bool nullToAbsent) {
+    return StepGoalsCompanion(
+      id: Value(id),
+      dailyGoal: Value(dailyGoal),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory StepGoal.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StepGoal(
+      id: serializer.fromJson<int>(json['id']),
+      dailyGoal: serializer.fromJson<int>(json['dailyGoal']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'dailyGoal': serializer.toJson<int>(dailyGoal),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  StepGoal copyWith({int? id, int? dailyGoal, DateTime? updatedAt}) => StepGoal(
+    id: id ?? this.id,
+    dailyGoal: dailyGoal ?? this.dailyGoal,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  StepGoal copyWithCompanion(StepGoalsCompanion data) {
+    return StepGoal(
+      id: data.id.present ? data.id.value : this.id,
+      dailyGoal: data.dailyGoal.present ? data.dailyGoal.value : this.dailyGoal,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StepGoal(')
+          ..write('id: $id, ')
+          ..write('dailyGoal: $dailyGoal, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, dailyGoal, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StepGoal &&
+          other.id == this.id &&
+          other.dailyGoal == this.dailyGoal &&
+          other.updatedAt == this.updatedAt);
+}
+
+class StepGoalsCompanion extends UpdateCompanion<StepGoal> {
+  final Value<int> id;
+  final Value<int> dailyGoal;
+  final Value<DateTime> updatedAt;
+  const StepGoalsCompanion({
+    this.id = const Value.absent(),
+    this.dailyGoal = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  StepGoalsCompanion.insert({
+    this.id = const Value.absent(),
+    this.dailyGoal = const Value.absent(),
+    required DateTime updatedAt,
+  }) : updatedAt = Value(updatedAt);
+  static Insertable<StepGoal> custom({
+    Expression<int>? id,
+    Expression<int>? dailyGoal,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dailyGoal != null) 'daily_goal': dailyGoal,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  StepGoalsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? dailyGoal,
+    Value<DateTime>? updatedAt,
+  }) {
+    return StepGoalsCompanion(
+      id: id ?? this.id,
+      dailyGoal: dailyGoal ?? this.dailyGoal,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (dailyGoal.present) {
+      map['daily_goal'] = Variable<int>(dailyGoal.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StepGoalsCompanion(')
+          ..write('id: $id, ')
+          ..write('dailyGoal: $dailyGoal, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $WaterEntriesTable waterEntries = $WaterEntriesTable(this);
   late final $WaterGoalsTable waterGoals = $WaterGoalsTable(this);
   late final $StepSnapshotsTable stepSnapshots = $StepSnapshotsTable(this);
+  late final $StepGoalsTable stepGoals = $StepGoalsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -827,6 +1076,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     waterEntries,
     waterGoals,
     stepSnapshots,
+    stepGoals,
   ];
 }
 
@@ -1317,6 +1567,156 @@ typedef $$StepSnapshotsTableProcessedTableManager =
       StepSnapshot,
       PrefetchHooks Function()
     >;
+typedef $$StepGoalsTableCreateCompanionBuilder =
+    StepGoalsCompanion Function({
+      Value<int> id,
+      Value<int> dailyGoal,
+      required DateTime updatedAt,
+    });
+typedef $$StepGoalsTableUpdateCompanionBuilder =
+    StepGoalsCompanion Function({
+      Value<int> id,
+      Value<int> dailyGoal,
+      Value<DateTime> updatedAt,
+    });
+
+class $$StepGoalsTableFilterComposer
+    extends Composer<_$AppDatabase, $StepGoalsTable> {
+  $$StepGoalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dailyGoal => $composableBuilder(
+    column: $table.dailyGoal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StepGoalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StepGoalsTable> {
+  $$StepGoalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dailyGoal => $composableBuilder(
+    column: $table.dailyGoal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StepGoalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StepGoalsTable> {
+  $$StepGoalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get dailyGoal =>
+      $composableBuilder(column: $table.dailyGoal, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$StepGoalsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StepGoalsTable,
+          StepGoal,
+          $$StepGoalsTableFilterComposer,
+          $$StepGoalsTableOrderingComposer,
+          $$StepGoalsTableAnnotationComposer,
+          $$StepGoalsTableCreateCompanionBuilder,
+          $$StepGoalsTableUpdateCompanionBuilder,
+          (StepGoal, BaseReferences<_$AppDatabase, $StepGoalsTable, StepGoal>),
+          StepGoal,
+          PrefetchHooks Function()
+        > {
+  $$StepGoalsTableTableManager(_$AppDatabase db, $StepGoalsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StepGoalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StepGoalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StepGoalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> dailyGoal = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => StepGoalsCompanion(
+                id: id,
+                dailyGoal: dailyGoal,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> dailyGoal = const Value.absent(),
+                required DateTime updatedAt,
+              }) => StepGoalsCompanion.insert(
+                id: id,
+                dailyGoal: dailyGoal,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StepGoalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StepGoalsTable,
+      StepGoal,
+      $$StepGoalsTableFilterComposer,
+      $$StepGoalsTableOrderingComposer,
+      $$StepGoalsTableAnnotationComposer,
+      $$StepGoalsTableCreateCompanionBuilder,
+      $$StepGoalsTableUpdateCompanionBuilder,
+      (StepGoal, BaseReferences<_$AppDatabase, $StepGoalsTable, StepGoal>),
+      StepGoal,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1327,4 +1727,6 @@ class $AppDatabaseManager {
       $$WaterGoalsTableTableManager(_db, _db.waterGoals);
   $$StepSnapshotsTableTableManager get stepSnapshots =>
       $$StepSnapshotsTableTableManager(_db, _db.stepSnapshots);
+  $$StepGoalsTableTableManager get stepGoals =>
+      $$StepGoalsTableTableManager(_db, _db.stepGoals);
 }

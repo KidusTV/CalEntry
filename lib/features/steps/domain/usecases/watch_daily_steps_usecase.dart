@@ -6,7 +6,7 @@ class WatchDailyStepsUseCase {
 
   WatchDailyStepsUseCase(this.repository);
 
-  Stream<DailyStepStats?> call(DateTime day) {
-    return repository.watchDailySteps(day);
+  Stream<DailyStepStats> call(DateTime day) {
+    return repository.watchStepsForDate(day);
   }
 }

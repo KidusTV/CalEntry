@@ -55,9 +55,9 @@ class _HomePageViewState extends State<HomePageView> {
               dayOffset: widget.dayOffset
           )),
         ),
-        // SliverToBoxAdapter(
-        //   child: HomeItem(child: StepsCard(goal: 10000)),
-        // )
+        SliverToBoxAdapter(
+          child: HomeItem(child: StepsCard(dayOffset: widget.dayOffset)),
+        )
       ],
     );
   }
