@@ -5,7 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'core/database/app_database.dart';
-import 'core/theme/app_theme.dart';
+import 'core/constants/theme/app_theme.dart';
 import 'core/navigation/app_router.dart';
 import 'features/steps/background/steps_sync_worker.dart';
 import 'features/water/presentation/providers/water_providers.dart';

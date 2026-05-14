@@ -19,10 +19,6 @@ class HeaderButton extends StatelessWidget {
         height: 46,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          // color: Colors.white.withValues(alpha: 0.05),
-          // border: Border.all(
-          //   color: Colors.white.withValues(alpha: 0.04),
-          // ),
         ),
         child: Icon(
           icon,

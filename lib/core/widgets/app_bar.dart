@@ -1,7 +1,7 @@
-import 'package:calentry/core/theme/app_text_theme.dart';
+import 'package:calentry/core/constants/theme/app_text_theme.dart';
 import 'package:flutter/material.dart';
 
-import '../../features/home/presentation/widgets/home_day_header.dart';
+import '../../features/home/presentation/widgets/header_button.dart';
 import '../constants/app_spacing.dart';
 
 class CustomAppBar extends StatelessWidget {
@@ -14,6 +14,7 @@ class CustomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       bottom: false,
       child: SizedBox(
@@ -126,7 +127,7 @@ class CustomAppBar extends StatelessWidget {
                           child: Text(
                             title,
                             key: ValueKey(title),
-                            style: buildTextTheme(Brightness.dark).bodyLarge,
+                            style: theme.textTheme.bodyLarge,
                           ),
                         ),
                       ),

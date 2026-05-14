@@ -1,13 +1,14 @@
 import 'package:calentry/features/home/domain/entities/dummies.dart';
 import 'package:calentry/features/home/presentation/widgets/home_item.dart';
-import 'package:calentry/features/home/presentation/widgets/meal_overview_card.dart';
+import 'package:calentry/features/nutrition/presentation/widgets/meal_overview_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/scroll_custom_view.dart';
 import '../../../steps/presentation/widgets/steps_view.dart';
 import '../../../water/presentation/widgets/water_input_card/water_input_card.dart';
-import '../../domain/entities/goal_entitiy.dart';
-import 'overview_section.dart';
+import '../../domain/entities/nutrient_entitiy.dart';
+import '../widgets/overview/overview_section.dart';
 
 class HomePageView extends StatefulWidget {
   final int dayOffset;
@@ -22,13 +23,13 @@ class HomePageView extends StatefulWidget {
 }
 
 class _HomePageViewState extends State<HomePageView> {
-  late GoalEntity focusedGoal;
+  late NutrientEntity focusedNutrient;
 
   @override
   void initState() {
     super.initState();
 
-    focusedGoal = goals.first;
+    focusedNutrient = nutrients.first;
   }
 
   @override
@@ -41,11 +42,13 @@ class _HomePageViewState extends State<HomePageView> {
         SliverToBoxAdapter(
           child: HomeItem(
             child: OverviewSection(
-              focusedGoal: focusedGoal,
-              goals: goals,
-              onGoalFocused: (goal) {
+              dayOffset: widget.dayOffset,
+              focusedNutrient: focusedNutrient,
+              nutrients: nutrients,
+              onGoalFocused: (nutrient) {
                 setState(() {
-                  focusedGoal = goal;
+                  HapticFeedback.lightImpact();
+                  focusedNutrient = nutrient;
                 });
               },
             )
@@ -53,11 +56,11 @@ class _HomePageViewState extends State<HomePageView> {
         ),
         SliverToBoxAdapter(
           child: HomeItem(child: MealOverviewCard(
-            consumedCalories: 1760,
-            targetCalories: 2200,
-            breakfastCalories: 420,
-            lunchCalories: 780,
-            dinnerCalories: 560,
+            consumedCalories: 0,
+            targetCalories: 0,
+            breakfastCalories: 0,
+            lunchCalories: 0,
+            dinnerCalories: 0,
             snackCalories: 0,
             onTap: () {},
           )),
@@ -69,7 +72,7 @@ class _HomePageViewState extends State<HomePageView> {
         ),
         SliverToBoxAdapter(
           child: HomeItem(child: StepsCard(dayOffset: widget.dayOffset)),
-        )
+        ),
       ],
     );
   }

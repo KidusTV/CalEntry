@@ -27,14 +27,16 @@ final stepLocalDataSourceProvider = Provider<StepLocalDataSource>((ref) {
 
 final stepsRepositoryProvider = Provider<StepsRepository>((ref) {
   return StepsRepositoryImpl(
-    local: ref.read(stepLocalDataSourceProvider),
-    remote: ref.read(healthConnectDataSourceProvider),
+    local: ref.watch(stepLocalDataSourceProvider),  // watch statt read
+    remote: ref.watch(healthConnectDataSourceProvider),
   );
 });
 
 /// Haupt-Provider für die Schritte eines bestimmten Tages basierend auf einem dayOffset.
 /// 0 = heute, -1 = gestern, etc.
 final dailyStepsProvider = StreamProvider.family<DailyStepStats, int>((ref, dayOffset) {
+  ref.keepAlive(); // 👈 State bleibt erhalten wenn Page aus Viewport scrollt
+
   final date = dateForOffset(dayOffset);
   final repo = ref.watch(stepsRepositoryProvider);
   return repo.watchStepsForDate(date);

@@ -4,6 +4,10 @@ TextTheme buildTextTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
 
   return TextTheme(
+    titleLarge: TextStyle(
+      fontWeight: FontWeight.w700,
+      color: isDark ? Colors.white : Colors.black,
+    ),
     displayLarge: TextStyle(
       fontSize: 42,
       fontWeight: FontWeight.w700,

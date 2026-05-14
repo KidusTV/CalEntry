@@ -70,8 +70,42 @@ class WaterLocalDataSource {
         .map((rows) => rows.map(WaterEntryModel.fromDrift).toList());
   }
 
-  Future<void> insertEntry(WaterEntriesCompanion companion) {
-    return db.into(db.waterEntries).insert(companion);
+  Future<void> insertEntry(WaterEntriesCompanion companion) async {
+    final createdAt = companion.createdAt.value;
+    double amount = companion.amount.value;
+
+    final startOfDay = DateTime(
+      createdAt.year,
+      createdAt.month,
+      createdAt.day,
+    );
+
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final entries = await (db.select(db.waterEntries)
+      ..where((tbl) =>
+      tbl.createdAt.isBiggerOrEqualValue(startOfDay) &
+      tbl.createdAt.isSmallerThanValue(endOfDay)))
+        .get();
+
+    final currentTotal = entries.fold<double>(
+      0,
+          (sum, e) => sum + e.amount,
+    );
+
+    // Negative Entries begrenzen
+    if (currentTotal + amount < 0) {
+      amount = -currentTotal;
+    }
+
+    // Wenn eh nichts mehr übrig
+    if (amount == 0) return;
+
+    await db.into(db.waterEntries).insert(
+      companion.copyWith(
+        amount: Value(amount),
+      ),
+    );
   }
 
   Future<void> deleteEntry(String id) {

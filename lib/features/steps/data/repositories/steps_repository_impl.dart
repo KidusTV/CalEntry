@@ -8,8 +8,7 @@ class StepsRepositoryImpl implements StepsRepository {
   final StepLocalDataSource _local;
   final HealthConnectStepsDataSource _remote;
 
-  // Welche Tage wurden in dieser App-Session bereits gesynct?
-  final Set<DateTime> _syncedDates = {};
+  final Set<DateTime> _syncedThisSession = {};
 
   StepsRepositoryImpl({
     required StepLocalDataSource local,
@@ -34,18 +33,19 @@ class StepsRepositoryImpl implements StepsRepository {
     });
   }
 
-  final Set<DateTime> _syncedThisSession = {};
-
   Future<void> _syncIfNeeded(DateTime date) async {
-    final isToday = date == DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    final isToday = date == today;
 
     if (isToday) {
-      // Heute: einmal pro Session syncen
       if (_syncedThisSession.contains(date)) return;
       _syncedThisSession.add(date);
       await syncSteps(date, isFinal: false);
     } else {
-      // Vergangener Tag: nur wenn noch nicht finalisiert
       if (await _local.isDayFinalized(date)) return;
       await syncSteps(date, isFinal: true);
     }
@@ -59,7 +59,6 @@ class StepsRepositoryImpl implements StepsRepository {
       await _local.saveSteps(day: normalizedDate, steps: steps, isFinal: isFinal);
     } catch (_) {}
   }
-
 
   @override
   Future<void> setGoal(int steps) async {

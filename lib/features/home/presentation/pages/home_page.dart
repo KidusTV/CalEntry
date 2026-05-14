@@ -3,7 +3,7 @@ import 'package:intl/date_symbol_data_file.dart';
 
 import '../../../../core/widgets/app_bar.dart';
 import '../../../scanner/presentation/pages/scanner_page.dart';
-import '../widgets/home_page_view.dart';
+import 'home_page_view.dart';
 import 'package:intl/intl.dart';
 
 String resolveTitle(DateTime baseDate, int offset) {

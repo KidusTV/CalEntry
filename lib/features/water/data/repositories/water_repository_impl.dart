@@ -89,6 +89,23 @@ class WaterRepositoryImpl implements WaterRepository {
   }
 
   @override
+  Future<void> removeDrink(double amount, {required DateTime date}) async {
+    // createdAt wird auf den angezeigten Tag gesetzt (Mitternacht + jetzt-Zeit),
+    // damit vergangene Tage korrekt befüllt werden können.
+    final now = DateTime.now();
+    final createdAt = DateTime(
+      date.year, date.month, date.day,
+      now.hour, now.minute, now.second,
+    );
+    final companion = WaterEntriesCompanion.insert(
+      id: const Uuid().v4(),
+      amount: -amount,
+      createdAt: createdAt,
+    );
+    await _local.insertEntry(companion);
+  }
+
+  @override
   Future<void> removeLastDrink({required DateTime date}) {
     return _local.deleteLastEntryForDate(date);
   }

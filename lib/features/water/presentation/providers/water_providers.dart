@@ -8,6 +8,7 @@ import '../../domain/entities/water_entry_entity.dart';
 import '../../domain/entities/water_goal_entity.dart';
 import '../../domain/repositories/water_repository.dart';
 import '../../domain/usecases/add_drink_use_case.dart';
+import '../../domain/usecases/remove_drink_use_case.dart';
 import '../../domain/usecases/remove_entry_use_case.dart';
 import '../../domain/usecases/remove_last_drink_use_case.dart';
 import '../../domain/usecases/set_goal_use_case.dart';
@@ -59,6 +60,11 @@ final waterRepositoryProvider = Provider<WaterRepository>((ref) {
 final addDrinkUseCaseProvider = Provider<AddDrinkUseCase>((ref) {
   return AddDrinkUseCase(ref.watch(waterRepositoryProvider));
 });
+
+final removeDrinkUseCaseProvider = Provider<RemoveDrinkUseCase>((ref) {
+  return RemoveDrinkUseCase(ref.watch(waterRepositoryProvider));
+});
+
 
 final removeEntryUseCaseProvider = Provider<RemoveEntryUseCase>((ref) {
   return RemoveEntryUseCase(ref.watch(waterRepositoryProvider));

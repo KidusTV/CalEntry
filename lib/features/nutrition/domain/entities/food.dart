@@ -1,5 +1,3 @@
-import 'meal_type.dart';
-
 class FoodEntryEntity {
   final String id;
   final String title;
@@ -8,7 +6,6 @@ class FoodEntryEntity {
   final double protein;
   final double fat;
   final double sugar;
-  final MealType mealType;
   final DateTime createdAt;
 
   const FoodEntryEntity({
@@ -18,7 +15,6 @@ class FoodEntryEntity {
     required this.protein,
     required this.fat,
     required this.sugar,
-    required this.mealType,
     required this.createdAt,
     this.imageUrl,
   });

@@ -24,12 +24,20 @@ class StepLocalDataSource {
     bool isFinal = false,
   }) async {
     final normalized = DateTime(day.year, day.month, day.day);
-    await db.into(db.stepSnapshots).insertOnConflictUpdate(
+    await db.into(db.stepSnapshots).insert(
       StepSnapshotsCompanion(
         day: Value(normalized),
         steps: Value(steps),
         updatedAt: Value(DateTime.now()),
         isFinal: Value(isFinal),
+      ),
+      onConflict: DoUpdate(
+            (old) => StepSnapshotsCompanion.custom(
+          steps: Variable(steps),
+          updatedAt: Variable(DateTime.now()),
+          isFinal: Variable(isFinal),
+        ),
+        target: [db.stepSnapshots.day],
       ),
     );
   }
@@ -49,7 +57,6 @@ class StepLocalDataSource {
   Stream<StepSnapshotModel?> watchSteps(DateTime day) {
     final normalized = DateTime(day.year, day.month, day.day);
 
-    // Beide Streams kombinieren — Drift tracked beide Tabellen korrekt
     final snapshotStream = (db.select(db.stepSnapshots)
       ..where((t) => t.day.equals(normalized)))
         .watchSingleOrNull();

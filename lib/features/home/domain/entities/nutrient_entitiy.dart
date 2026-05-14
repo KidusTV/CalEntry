@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-enum GoalUnit {
+enum NutrientUnit {
   kcal,
   grams,
   milliliter,
   percent,
 }
 
-class GoalEntity {
+class NutrientEntity {
   final String id;
 
   final String title;
@@ -20,7 +20,7 @@ class GoalEntity {
 
   final IconData icon;
 
-  const GoalEntity({
+  const NutrientEntity({
     required this.id,
     required this.title,
     required this.shortLabel,

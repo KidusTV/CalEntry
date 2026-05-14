@@ -15,6 +15,11 @@ class WaterController {
     await _ref.read(addDrinkUseCaseProvider).call(amount, date: date);
   }
 
+  Future<void> removeDrink(double amount, {required int dayOffset}) async {
+    final date = dateForOffset(dayOffset);
+    await _ref.read(removeDrinkUseCaseProvider).call(amount, date: date);
+  }
+
   Future<void> removeLastDrink({required int dayOffset}) async {
     final date = dateForOffset(dayOffset);
     await _ref.read(removeLastDrinkUseCaseProvider).call(date: date);

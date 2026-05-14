@@ -24,6 +24,8 @@ abstract class WaterRepository {
   /// Fügt einen Drink für einen bestimmten Tag hinzu.
   Future<void> addDrink(double amount, {required DateTime date});
 
+  Future<void> removeDrink(double amount, {required DateTime date});
+
   /// ~~Löscht den neuesten Eintrag des heutigen Tages (−-Button).~~
   /// Löscht den neuesten Eintrag eines bestimmten Tages (−-Button).
   Future<void> removeLastDrink({required DateTime date});

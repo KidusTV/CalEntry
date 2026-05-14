@@ -214,12 +214,20 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
     HapticFeedback.lightImpact();
   }
 
-  Future<void> _removeLast() async {
-    await ref.read(waterControllerProvider).removeLastDrink(
+  Future<void> _removeDrink(double amount) async {
+    await ref.read(waterControllerProvider).removeDrink(
+      amount,
       dayOffset: _dayOffset,
     );
     HapticFeedback.lightImpact();
   }
+
+  // Future<void> _removeLast() async {
+  //   await ref.read(waterControllerProvider).removeLastDrink(
+  //     dayOffset: _dayOffset,
+  //   );
+  //   HapticFeedback.lightImpact();
+  // }
 
   @override
   void dispose() {
@@ -243,17 +251,27 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
       children: [
         CircleButton(
           icon:  Icons.remove,
-          onTap: _removeLast,
+          onTap: () => _removeDrink(250),
         ),
 
-        WaterCircle(
-          displayedProgress: _displayedProgress,
-          wavePhase:         _wavePhase,
-          tiltAngle:         _tiltAngle,
-          rollAngle:         _visibleRollAngle,
-          ringOpacity:       _ringOpacity,
-          bubbles:           _bubbles,
-          waterMl:           _displayedMl,
+        GestureDetector(
+          onTap: () {
+            showWaterPicker(
+              context,
+              onChanged: (value) {
+                // Wasser aktualisieren
+              },
+            );
+          },
+          child: WaterCircle(
+            displayedProgress: _displayedProgress,
+            wavePhase:         _wavePhase,
+            tiltAngle:         _tiltAngle,
+            rollAngle:         _visibleRollAngle,
+            ringOpacity:       _ringOpacity,
+            bubbles:           _bubbles,
+            waterMl:           _displayedMl,
+          ),
         ),
 
         CircleButton(
@@ -262,5 +280,82 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
         ),
       ],
     );
+  }
+
+  Future<void> showWaterPicker(BuildContext context, {required ValueChanged<int> onChanged}) async {
+    final controller = FixedExtentScrollController(initialItem: _displayedMl ~/ 50);
+
+    int currentValue = _displayedMl;
+
+    final selectedValue = await showGeneralDialog<int>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Water Picker",
+      barrierColor: Colors.black54,
+      pageBuilder: (_, __, ___) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Center(
+              child: SizedBox(
+                height: 250,
+                child: ListWheelScrollView.useDelegate(
+                  controller: controller,
+                  itemExtent: 60,
+                  perspective: 0.003,
+                  diameterRatio: 1.4,
+                  physics: const FixedExtentScrollPhysics(),
+                  onSelectedItemChanged: (index) {
+                    setState(() {
+                      currentValue = index * 50;
+                    });
+
+                    onChanged(currentValue);
+                  },
+                  childDelegate: ListWheelChildBuilderDelegate(
+                    childCount: 61,
+                    builder: (context, index) {
+                      final value = index * 50;
+
+                      final selected = value == currentValue;
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context, value);
+                        },
+                        child: Center(
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 150),
+                            style: TextStyle(
+                              fontSize: selected ? 38 : 28,
+                              fontWeight: selected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: selected
+                                  ? Colors.white
+                                  : Colors.white54,
+                            ),
+                            child: Text("$value"),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (selectedValue != null) {
+      final difference = selectedValue - _displayedMl;
+      if (difference > 0) {
+        _addDrink(difference.toDouble());
+
+      } else if (difference < 0) {
+        _removeDrink(difference.abs().toDouble());
+      }
+    }
   }
 }

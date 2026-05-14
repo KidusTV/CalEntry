@@ -2,20 +2,23 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_radius.dart';
-import '../../../../core/constants/app_spacing.dart';
-import '../../domain/entities/goal_entitiy.dart';
+import '../../../../../core/constants/app_radius.dart';
+import '../../../../../core/constants/app_spacing.dart';
+import '../../../domain/entities/nutrient_entitiy.dart';
+import 'goal_switch_bar.dart';
 
 
 class OverviewSection extends StatefulWidget {
-  final GoalEntity focusedGoal;
-  final List<GoalEntity> goals;
-  final ValueChanged<GoalEntity> onGoalFocused;
+  final NutrientEntity focusedNutrient;
+  final List<NutrientEntity> nutrients;
+  final int dayOffset;
+  final ValueChanged<NutrientEntity> onGoalFocused;
 
   const OverviewSection({
     super.key,
-    required this.focusedGoal,
-    required this.goals,
+    required this.dayOffset,
+    required this.focusedNutrient,
+    required this.nutrients,
     required this.onGoalFocused,
   });
 
@@ -23,8 +26,7 @@ class OverviewSection extends StatefulWidget {
   State<OverviewSection> createState() => _OverviewSectionState();
 }
 
-class _OverviewSectionState extends State<OverviewSection>
-    with SingleTickerProviderStateMixin {
+class _OverviewSectionState extends State<OverviewSection> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   late Animation<double> _progressAnim;
@@ -33,14 +35,14 @@ class _OverviewSectionState extends State<OverviewSection>
   late Animation<double> _currentGoal;
   late Animation<double> _unitAnim;
 
-  late GoalEntity _oldGoal;
-  late GoalEntity _newGoal;
+  late NutrientEntity _oldGoal;
+  late NutrientEntity _newGoal;
 
   @override
   void initState() {
     super.initState();
-    _oldGoal = widget.focusedGoal;
-    _newGoal = widget.focusedGoal;
+    _oldGoal = widget.focusedNutrient;
+    _newGoal = widget.focusedNutrient;
 
     _controller = AnimationController(
       vsync: this,
@@ -90,17 +92,15 @@ class _OverviewSectionState extends State<OverviewSection>
       parent: _controller,
       curve: Curves.easeOutCubic,
     ));
-
-
   }
 
   @override
   void didUpdateWidget(covariant OverviewSection oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.focusedGoal.id != widget.focusedGoal.id) {
-      _oldGoal = oldWidget.focusedGoal;
-      _newGoal = widget.focusedGoal;
+    if (oldWidget.focusedNutrient.id != widget.focusedNutrient.id) {
+      _oldGoal = oldWidget.focusedNutrient;
+      _newGoal = widget.focusedNutrient;
 
       _setupAnimations();
       _controller.forward(from: 0);
@@ -118,10 +118,11 @@ class _OverviewSectionState extends State<OverviewSection>
     final theme = Theme.of(context);
 
     return Column(
+      spacing: AppSpacing.lg,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: AppSpacing.md,
           children: [
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -135,19 +136,25 @@ class _OverviewSectionState extends State<OverviewSection>
                 );
               },
               child: Container(
-                key: ValueKey(widget.focusedGoal.id),
+                key: ValueKey(widget.focusedNutrient.id),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.06),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
-                  widget.focusedGoal.icon,
+                  widget.focusedNutrient.icon,
                   size: 22,
                 ),
               ),
             ),
 
+            Expanded(
+              child: Text(
+                widget.focusedNutrient.title,
+                style: theme.textTheme.titleLarge,
+              )
+            ),
 
             Container(
               padding: const EdgeInsets.symmetric(
@@ -174,13 +181,11 @@ class _OverviewSectionState extends State<OverviewSection>
           ],
         ),
 
-        const SizedBox(height: 28),
 
-        Row(
-          children: [
-            Column(
+        Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: AppSpacing.sm,
               children: [
                 AnimatedBuilder(
                   animation: _currentMain,
@@ -203,7 +208,6 @@ class _OverviewSectionState extends State<OverviewSection>
                             text: " / ${target.round()} ${_newGoal.unit}",
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: Colors.white.withOpacity(0.45),
-                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -211,17 +215,6 @@ class _OverviewSectionState extends State<OverviewSection>
                     );
                   },
                 ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  widget.focusedGoal.title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
 
                 AnimatedBuilder(
                   animation: _currentSide,
@@ -270,7 +263,7 @@ class _OverviewSectionState extends State<OverviewSection>
                               builder: (context, _) {
                                 final current = _unitAnim.value.round();
 
-                                final newUnit = widget.focusedGoal.unit;
+                                final newUnit = widget.focusedNutrient.unit;
                                 final oldUnit = _oldGoal.unit;
 
                                 final useOld = newUnit.trim().length < oldUnit.length && current > newUnit.trim().length;
@@ -281,7 +274,7 @@ class _OverviewSectionState extends State<OverviewSection>
 
                                 return Text(
                                   text,
-                                  key: ValueKey(widget.focusedGoal.unit),
+                                  key: ValueKey(widget.focusedNutrient.unit),
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.white.withOpacity(0.55),
                                   ),
@@ -290,9 +283,9 @@ class _OverviewSectionState extends State<OverviewSection>
                             ),
                           ),
                           Text(
-                            " remaining today",
+                            (widget.dayOffset < 0) ? " übrig gehabt" : " übrig",
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.55),
+                              color: Colors.white.withValues(alpha: 0.55),
                             ),
                           ),
                         ],
@@ -303,10 +296,7 @@ class _OverviewSectionState extends State<OverviewSection>
               ],
             ),
 
-          ],
-        ),
 
-        const SizedBox(height: AppSpacing.lg),
 
         AnimatedBuilder(
           animation: _progressAnim,
@@ -323,11 +313,9 @@ class _OverviewSectionState extends State<OverviewSection>
           },
         ),
 
-        const SizedBox(height: AppSpacing.lg),
-
         GoalSwitchBar(
-          goals: widget.goals,
-          focusedGoal: widget.focusedGoal,
+          nutrients: widget.nutrients,
+          focusedNutrient: widget.focusedNutrient,
           onSelect: widget.onGoalFocused,
         ),
       ],
@@ -337,209 +325,4 @@ class _OverviewSectionState extends State<OverviewSection>
 
 
 
-class GoalSwitchBar extends StatelessWidget {
-  final List<GoalEntity> goals;
-  final GoalEntity focusedGoal;
-  final ValueChanged<GoalEntity> onSelect;
 
-  const GoalSwitchBar({
-    super.key,
-    required this.goals,
-    required this.focusedGoal,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: goals.map((goal) {
-        final isActive = goal.id == focusedGoal.id;
-        return GoalSwichBar(onSelect: onSelect, isActive: isActive, goal: goal);
-      }).toList(),
-    );
-  }
-}
-
-class GoalSwichBar extends StatelessWidget {
-  const GoalSwichBar({
-    super.key,
-    required this.goal,
-    required this.onSelect,
-    required this.isActive,
-  });
-
-  final GoalEntity goal;
-  final ValueChanged<GoalEntity> onSelect;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(
-        begin: 0,
-        end: isActive ? goal.progress : 0,
-      ),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutCubic,
-      builder: (context, animatedProgress, _) {
-        return TweenAnimationBuilder<double>(
-          tween: Tween<double>(
-            begin: 0,
-            end: isActive ? 0 : goal.progress,
-          ),
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutCubic,
-          builder: (context, animProgress, _) {
-            return GestureDetector(
-              onTap: () => onSelect(goal),
-              child: Stack(
-                children: [
-                  // Umrandung
-                  // if (isActive)
-                  //   Positioned.fill(
-                  //     child: CustomPaint(
-                  //       painter: _ProgressBorderPainter(
-                  //         progress: animatedProgress,
-                  //         isActive: isActive,
-                  //       ),
-                  //     ),
-                  //   ),
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-
-                        // Progress Fill
-                        Positioned.fill(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: AnimatedFractionallySizedBox(
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeOut,
-                              heightFactor: 1,
-                              widthFactor: animProgress.clamp(0.0, 1.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFB36B).withOpacity(0.70),
-
-                                  borderRadius: BorderRadius.circular(AppRadius.sm),
-
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Main Container
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? Colors.white.withOpacity(0.12)
-                                : Colors.white.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                            border: Border.all(
-                              color: isActive
-                                  ? const Color(0xFFFFB36B)
-                                  : Colors.white.withOpacity(0.05),
-                            ),
-                          ),
-                          child: Text(
-                            goal.shortLabel,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: isActive
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.6),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-        );
-      }
-    );
-  }
-}
-
-
-
-class _ProgressBorderPainter extends CustomPainter {
-  final double progress;
-  final bool isActive;
-
-  _ProgressBorderPainter({
-    required this.progress,
-    required this.isActive,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-
-    // PROGRESS BORDER (arc effect)
-    final progressPaint = Paint()
-      ..color = isActive ? Color(0xFFFFB36B): Color(0xFFFF7D54)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = isActive ? 1.6 : 1.2
-      ..strokeCap = StrokeCap.round;
-
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(999),
-    );
-
-    // Startpunkt verschieben (Rotation des Pfads)
-    final path = Path()
-      ..addRRect(rrect)
-      ..transform(Matrix4.rotationZ(-math.pi / 2).storage);
-
-    final metrics = path.computeMetrics().first;
-
-    final totalLength = metrics.length;
-    final startOffset = totalLength * 0.75;
-    final drawLength = totalLength * progress;
-
-    final endOffset = startOffset + drawLength;
-
-    Path extractPath;
-
-    if (endOffset <= totalLength) {
-      extractPath = metrics.extractPath(
-        startOffset,
-        endOffset,
-      );
-    } else {
-      extractPath = Path()
-        ..addPath(
-          metrics.extractPath(startOffset, totalLength),
-          Offset.zero,
-        )
-        ..addPath(
-          metrics.extractPath(0, endOffset - totalLength),
-          Offset.zero,
-        );
-    }
-
-    canvas.drawPath(extractPath, progressPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ProgressBorderPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.isActive != isActive;
-  }
-}

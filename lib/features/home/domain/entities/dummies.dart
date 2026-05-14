@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'goal_entitiy.dart';
+import 'nutrient_entitiy.dart';
 
-final goals = [
-  GoalEntity(
+final nutrients = [
+  NutrientEntity(
     id: 'calories',
     title: 'Calories',
     shortLabel: 'kcal',
@@ -13,7 +13,7 @@ final goals = [
     icon: Icons.local_fire_department_rounded,
   ),
 
-  GoalEntity(
+  NutrientEntity(
     id: 'protein',
     title: 'Protein',
     shortLabel: 'protein',
@@ -23,7 +23,7 @@ final goals = [
     icon: Icons.fitness_center_rounded,
   ),
 
-  GoalEntity(
+  NutrientEntity(
     id: 'carbs',
     title: 'Carbs',
     shortLabel: 'carbs',
@@ -33,7 +33,7 @@ final goals = [
     icon: Icons.grain_rounded,
   ),
 
-  GoalEntity(
+  NutrientEntity(
     id: 'fat',
     title: 'Fat',
     shortLabel: 'fat',
