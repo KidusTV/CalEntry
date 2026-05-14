@@ -559,8 +559,20 @@ class $StepSnapshotsTable extends StepSnapshots
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isFinalMeta = const VerificationMeta(
+    'isFinal',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, day, steps, updatedAt];
+  late final GeneratedColumn<bool> isFinal = GeneratedColumn<bool>(
+    'is_final',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, day, steps, updatedAt, isFinal];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -600,6 +612,12 @@ class $StepSnapshotsTable extends StepSnapshots
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('is_final')) {
+      context.handle(
+        _isFinalMeta,
+        isFinal.isAcceptableOrUnknown(data['is_final']!, _isFinalMeta),
+      );
+    }
     return context;
   }
 
@@ -625,6 +643,10 @@ class $StepSnapshotsTable extends StepSnapshots
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      isFinal: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_final'],
+      )!,
     );
   }
 
@@ -645,11 +667,15 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
 
   /// Wann zuletzt synchronisiert
   final DateTime updatedAt;
+
+  /// True = vergangener Tag wurde final gesynct, nie wieder anfassen
+  final bool isFinal;
   const StepSnapshot({
     required this.id,
     required this.day,
     required this.steps,
     required this.updatedAt,
+    required this.isFinal,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -658,6 +684,7 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
     map['day'] = Variable<DateTime>(day);
     map['steps'] = Variable<int>(steps);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_final'] = Variable<bool>(isFinal);
     return map;
   }
 
@@ -667,6 +694,7 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
       day: Value(day),
       steps: Value(steps),
       updatedAt: Value(updatedAt),
+      isFinal: Value(isFinal),
     );
   }
 
@@ -680,6 +708,7 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
       day: serializer.fromJson<DateTime>(json['day']),
       steps: serializer.fromJson<int>(json['steps']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isFinal: serializer.fromJson<bool>(json['isFinal']),
     );
   }
   @override
@@ -690,6 +719,7 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
       'day': serializer.toJson<DateTime>(day),
       'steps': serializer.toJson<int>(steps),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isFinal': serializer.toJson<bool>(isFinal),
     };
   }
 
@@ -698,11 +728,13 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
     DateTime? day,
     int? steps,
     DateTime? updatedAt,
+    bool? isFinal,
   }) => StepSnapshot(
     id: id ?? this.id,
     day: day ?? this.day,
     steps: steps ?? this.steps,
     updatedAt: updatedAt ?? this.updatedAt,
+    isFinal: isFinal ?? this.isFinal,
   );
   StepSnapshot copyWithCompanion(StepSnapshotsCompanion data) {
     return StepSnapshot(
@@ -710,6 +742,7 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
       day: data.day.present ? data.day.value : this.day,
       steps: data.steps.present ? data.steps.value : this.steps,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isFinal: data.isFinal.present ? data.isFinal.value : this.isFinal,
     );
   }
 
@@ -719,13 +752,14 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
           ..write('id: $id, ')
           ..write('day: $day, ')
           ..write('steps: $steps, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isFinal: $isFinal')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, day, steps, updatedAt);
+  int get hashCode => Object.hash(id, day, steps, updatedAt, isFinal);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -733,7 +767,8 @@ class StepSnapshot extends DataClass implements Insertable<StepSnapshot> {
           other.id == this.id &&
           other.day == this.day &&
           other.steps == this.steps &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.isFinal == this.isFinal);
 }
 
 class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
@@ -741,17 +776,20 @@ class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
   final Value<DateTime> day;
   final Value<int> steps;
   final Value<DateTime> updatedAt;
+  final Value<bool> isFinal;
   const StepSnapshotsCompanion({
     this.id = const Value.absent(),
     this.day = const Value.absent(),
     this.steps = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.isFinal = const Value.absent(),
   });
   StepSnapshotsCompanion.insert({
     this.id = const Value.absent(),
     required DateTime day,
     required int steps,
     required DateTime updatedAt,
+    this.isFinal = const Value.absent(),
   }) : day = Value(day),
        steps = Value(steps),
        updatedAt = Value(updatedAt);
@@ -760,12 +798,14 @@ class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
     Expression<DateTime>? day,
     Expression<int>? steps,
     Expression<DateTime>? updatedAt,
+    Expression<bool>? isFinal,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (day != null) 'day': day,
       if (steps != null) 'steps': steps,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (isFinal != null) 'is_final': isFinal,
     });
   }
 
@@ -774,12 +814,14 @@ class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
     Value<DateTime>? day,
     Value<int>? steps,
     Value<DateTime>? updatedAt,
+    Value<bool>? isFinal,
   }) {
     return StepSnapshotsCompanion(
       id: id ?? this.id,
       day: day ?? this.day,
       steps: steps ?? this.steps,
       updatedAt: updatedAt ?? this.updatedAt,
+      isFinal: isFinal ?? this.isFinal,
     );
   }
 
@@ -798,6 +840,9 @@ class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (isFinal.present) {
+      map['is_final'] = Variable<bool>(isFinal.value);
+    }
     return map;
   }
 
@@ -807,7 +852,8 @@ class StepSnapshotsCompanion extends UpdateCompanion<StepSnapshot> {
           ..write('id: $id, ')
           ..write('day: $day, ')
           ..write('steps: $steps, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isFinal: $isFinal')
           ..write(')'))
         .toString();
   }
@@ -1398,6 +1444,7 @@ typedef $$StepSnapshotsTableCreateCompanionBuilder =
       required DateTime day,
       required int steps,
       required DateTime updatedAt,
+      Value<bool> isFinal,
     });
 typedef $$StepSnapshotsTableUpdateCompanionBuilder =
     StepSnapshotsCompanion Function({
@@ -1405,6 +1452,7 @@ typedef $$StepSnapshotsTableUpdateCompanionBuilder =
       Value<DateTime> day,
       Value<int> steps,
       Value<DateTime> updatedAt,
+      Value<bool> isFinal,
     });
 
 class $$StepSnapshotsTableFilterComposer
@@ -1433,6 +1481,11 @@ class $$StepSnapshotsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFinal => $composableBuilder(
+    column: $table.isFinal,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1465,6 +1518,11 @@ class $$StepSnapshotsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isFinal => $composableBuilder(
+    column: $table.isFinal,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StepSnapshotsTableAnnotationComposer
@@ -1487,6 +1545,9 @@ class $$StepSnapshotsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFinal =>
+      $composableBuilder(column: $table.isFinal, builder: (column) => column);
 }
 
 class $$StepSnapshotsTableTableManager
@@ -1524,11 +1585,13 @@ class $$StepSnapshotsTableTableManager
                 Value<DateTime> day = const Value.absent(),
                 Value<int> steps = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isFinal = const Value.absent(),
               }) => StepSnapshotsCompanion(
                 id: id,
                 day: day,
                 steps: steps,
                 updatedAt: updatedAt,
+                isFinal: isFinal,
               ),
           createCompanionCallback:
               ({
@@ -1536,11 +1599,13 @@ class $$StepSnapshotsTableTableManager
                 required DateTime day,
                 required int steps,
                 required DateTime updatedAt,
+                Value<bool> isFinal = const Value.absent(),
               }) => StepSnapshotsCompanion.insert(
                 id: id,
                 day: day,
                 steps: steps,
                 updatedAt: updatedAt,
+                isFinal: isFinal,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

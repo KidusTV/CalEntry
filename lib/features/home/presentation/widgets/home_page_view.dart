@@ -1,5 +1,6 @@
 import 'package:calentry/features/home/domain/entities/dummies.dart';
 import 'package:calentry/features/home/presentation/widgets/home_item.dart';
+import 'package:calentry/features/home/presentation/widgets/meal_overview_card.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/scroll_custom_view.dart';
@@ -49,6 +50,17 @@ class _HomePageViewState extends State<HomePageView> {
               },
             )
           ),
+        ),
+        SliverToBoxAdapter(
+          child: HomeItem(child: MealOverviewCard(
+            consumedCalories: 1760,
+            targetCalories: 2200,
+            breakfastCalories: 420,
+            lunchCalories: 780,
+            dinnerCalories: 560,
+            snackCalories: 0,
+            onTap: () {},
+          )),
         ),
         SliverToBoxAdapter(
           child: HomeItem(child: WaterInputCard(

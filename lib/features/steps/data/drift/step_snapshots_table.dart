@@ -11,4 +11,7 @@ class StepSnapshots extends Table {
 
   /// Wann zuletzt synchronisiert
   DateTimeColumn get updatedAt => dateTime()();
+
+  /// True = vergangener Tag wurde final gesynct, nie wieder anfassen
+  BoolColumn get isFinal => boolean().withDefault(const Constant(false))();
 }

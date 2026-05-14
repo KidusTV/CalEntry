@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:health/health.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -12,9 +13,14 @@ import 'features/water/presentation/providers/water_providers.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Workmanager().initialize(
-    callbackDispatcher,
+  // Health Connect Permissions beim Start anfragen
+  final health = Health();
+  await health.requestAuthorization(
+    [HealthDataType.STEPS],
+    permissions: [HealthDataAccess.READ],
   );
+
+  await Workmanager().initialize(callbackDispatcher);
   await Workmanager().registerPeriodicTask(
     'steps-sync',
     syncStepsTask,
@@ -22,6 +28,7 @@ Future<void> main() async {
   );
 
   initializeDateFormatting('de_DE');
+
   runApp(
     ProviderScope(
       overrides: [
@@ -29,7 +36,6 @@ Future<void> main() async {
       ],
       child: PremiumTrackingApp(),
     ),
-
   );
 }
 

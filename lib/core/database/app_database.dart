@@ -16,7 +16,8 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2; // Erhöht von 1 auf 2
+  int get schemaVersion => 3;
+
 
   @override
   MigrationStrategy get migration {
@@ -26,9 +27,12 @@ class AppDatabase extends _$AppDatabase {
       },
       onUpgrade: (m, from, to) async {
         if (from < 2) {
-          // Erstellt die neuen Tabellen für das Steps-System
           await m.createTable(stepSnapshots);
           await m.createTable(stepGoals);
+        }
+        if (from < 3) {
+          // isFinal Spalte zu bestehenden Rows hinzufügen (default: false)
+          await m.addColumn(stepSnapshots, stepSnapshots.isFinal);
         }
       },
     );

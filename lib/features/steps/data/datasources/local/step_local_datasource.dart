@@ -2,17 +2,26 @@ import 'package:drift/drift.dart';
 import '../../../../../core/database/app_database.dart';
 import '../../models/step_snapshot_model.dart';
 import '../../models/step_goal_model.dart';
+import 'package:rxdart/rxdart.dart';
 
 class StepLocalDataSource {
   final AppDatabase db;
 
   StepLocalDataSource(this.db);
 
+
+
+  Future<bool> isDayFinalized(DateTime day) async {
+    final StepSnapshotModel? snapshot = await getSteps(day);
+    return snapshot?.isFinal ?? false; // isFinal muss auch ins Model
+  }
+
   // ─── Snapshots ─────────────────────────────────────────────────────────────
 
   Future<void> saveSteps({
     required DateTime day,
     required int steps,
+    bool isFinal = false,
   }) async {
     final normalized = DateTime(day.year, day.month, day.day);
     await db.into(db.stepSnapshots).insertOnConflictUpdate(
@@ -20,6 +29,7 @@ class StepLocalDataSource {
         day: Value(normalized),
         steps: Value(steps),
         updatedAt: Value(DateTime.now()),
+        isFinal: Value(isFinal),
       ),
     );
   }
@@ -39,14 +49,27 @@ class StepLocalDataSource {
   Stream<StepSnapshotModel?> watchSteps(DateTime day) {
     final normalized = DateTime(day.year, day.month, day.day);
 
-    return (db.select(db.stepSnapshots)
-          ..where((t) => t.day.equals(normalized)))
-        .watchSingleOrNull()
-        .asyncMap((row) async {
-      if (row == null) return null;
-      final goal = await getCurrentGoal();
-      return StepSnapshotModel.fromDrift(row, goal: goal?.dailyGoal ?? 10000);
-    });
+    // Beide Streams kombinieren — Drift tracked beide Tabellen korrekt
+    final snapshotStream = (db.select(db.stepSnapshots)
+      ..where((t) => t.day.equals(normalized)))
+        .watchSingleOrNull();
+
+    final goalStream = (db.select(db.stepGoals)
+      ..orderBy([(t) => OrderingTerm.desc(t.id)])
+      ..limit(1))
+        .watchSingleOrNull();
+
+    return Rx.combineLatest2(
+      snapshotStream,
+      goalStream,
+          (snapshot, goal) {
+        if (snapshot == null) return null;
+        return StepSnapshotModel.fromDrift(
+          snapshot,
+          goal: goal?.dailyGoal ?? 10000,
+        );
+      },
+    );
   }
 
   // ─── Goals ──────────────────────────────────────────────────────────────────
