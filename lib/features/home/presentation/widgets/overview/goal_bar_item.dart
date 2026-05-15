@@ -58,22 +58,22 @@ class GoalBarItem extends StatelessWidget {
                           children: [
 
                             // Progress Fill
-                            Positioned.fill(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: AnimatedFractionallySizedBox(
-                                  duration: const Duration(milliseconds: 400),
-                                  curve: Curves.easeOut,
-                                  heightFactor: 1,
-                                  widthFactor: animProgress.clamp(0.0, 1.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFB36B).withOpacity(0.70),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // Positioned.fill(
+                            //   child: Align(
+                            //     alignment: Alignment.centerLeft,
+                            //     child: AnimatedFractionallySizedBox(
+                            //       duration: const Duration(milliseconds: 400),
+                            //       curve: Curves.easeOut,
+                            //       heightFactor: 1,
+                            //       widthFactor: animProgress.clamp(0.0, 1.0),
+                            //       child: Container(
+                            //         decoration: BoxDecoration(
+                            //           color: const Color(0xFFFFB36B).withOpacity(0.70),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
 
                             // Main Container
                             AnimatedContainer(

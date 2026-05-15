@@ -30,21 +30,17 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
   // ── Physik-State ──────────────────────────────────────────────────────────
   double _displayedProgress = 0.0;
   double _progressVelocity  = 0.0;
-
   double _tiltAngle    = 0.0;
   double _tiltVelocity = 0.0;
   double _targetTilt   = 0.0;
-
   double _rollAngle        = 0.0;
   double _rollVelocity     = 0.0;
   double _targetRoll       = 0.0;
   double _visibleRollAngle = 0.0;
-
   double _wavePhase = 0.0;
   final List<Bubble> _bubbles = [];
   final _rng = Random();
 
-  // ── Ziel-Flash ────────────────────────────────────────────────────────────
   double _goalFlashT     = 0.0;
   bool   _wasGoalReached = false;
 
@@ -55,12 +51,10 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
     return 1.0 - ((_goalFlashT - 0.70) / 0.30);
   }
 
-  // ── Ticker / Sensor ───────────────────────────────────────────────────────
   Ticker? _ticker;
   Duration _lastElapsed = Duration.zero;
   StreamSubscription<AccelerometerEvent>? _accelSub;
 
-  // ── Zielwerte (aus DB-Stream) ─────────────────────────────────────────────
   double _targetProgress = 0.0;
   bool   _isFull         = false;
   int    _displayedMl    = 0;
@@ -69,7 +63,6 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
   bool _isPickerActive = false;
   FixedExtentScrollController? _pickerController;
   int _pickerTemporaryValue = 0;
-
 
   int get _dayOffset => widget.dayOffset;
 
@@ -100,15 +93,12 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
   }
 
   void _onFrame(Duration elapsed) {
-    final dt     = (elapsed - _lastElapsed).inMicroseconds / 1e6;
+    final dt = (elapsed - _lastElapsed).inMicroseconds / 1e6;
     _lastElapsed = elapsed;
     final safeDt = dt.clamp(0.0, 0.05);
 
     final progressResult = integrateProgress(
-      target: _targetProgress,
-      displayed: _displayedProgress,
-      velocity: _progressVelocity,
-      dt: safeDt,
+      target: _targetProgress, displayed: _displayedProgress, velocity: _progressVelocity, dt: safeDt,
     );
     _displayedProgress = progressResult.$1;
     _progressVelocity  = progressResult.$2;
@@ -116,7 +106,7 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
     final goalNow = _displayedProgress >= 0.999;
     if (goalNow && !_wasGoalReached) _goalFlashT = 0.001;
     _wasGoalReached = goalNow;
-    _isFull         = goalNow;
+    _isFull = goalNow;
 
     if (_goalFlashT > 0.0) {
       _goalFlashT += safeDt / kFlashDuration;
@@ -124,22 +114,20 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
     }
 
     final tiltResult = integrateSpring(
-      target: -_targetTilt, angle: _tiltAngle, velocity: _tiltVelocity,
-      maxAngle: kMaxTilt, wrapAngle: false, dt: safeDt,
+      target: -_targetTilt, angle: _tiltAngle, velocity: _tiltVelocity, maxAngle: kMaxTilt, wrapAngle: false, dt: safeDt,
     );
-    _tiltAngle    = tiltResult.$1;
+    _tiltAngle = tiltResult.$1;
     _tiltVelocity = tiltResult.$2;
 
     final rollResult = integrateSpring(
-      target: _targetRoll, angle: _rollAngle, velocity: _rollVelocity,
-      maxAngle: kMaxRoll, wrapAngle: true, dt: safeDt,
+      target: _targetRoll, angle: _rollAngle, velocity: _rollVelocity, maxAngle: kMaxRoll, wrapAngle: true, dt: safeDt,
     );
-    _rollAngle    = rollResult.$1;
+    _rollAngle = rollResult.$1;
     _rollVelocity = rollResult.$2;
 
     final rollTarget = _isFull ? _rollAngle : 0.0;
     var diff = rollTarget - _visibleRollAngle;
-    while (diff >  pi) diff -= 2 * pi;
+    while (diff > pi) diff -= 2 * pi;
     while (diff < -pi) diff += 2 * pi;
     _visibleRollAngle += diff * min(1.0, safeDt * 6.0);
 
@@ -232,14 +220,16 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
                   ),
                 );
               },
-              child: _isPickerActive ? WaterPicker(
-                pickerTemporaryValue: _pickerTemporaryValue,
-                pickerController: _pickerController!,
-                onSelectedItemChanged: (index) {
-                  setState(() => _pickerTemporaryValue = index * 50);
-                  HapticFeedback.selectionClick();
-                },
-
+              child: _isPickerActive ? TapRegion(
+                onTapOutside: (_) => _togglePicker(),
+                child: WaterPicker(
+                  pickerTemporaryValue: _pickerTemporaryValue,
+                  pickerController: _pickerController!,
+                  onSelectedItemChanged: (index) {
+                    setState(() => _pickerTemporaryValue = index * 50);
+                    HapticFeedback.selectionClick();
+                  },
+                ),
               ) : WaterLabel(displayedMl: _displayedMl),
             ),
           ),
@@ -248,6 +238,4 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
       ],
     );
   }
-
-
 }

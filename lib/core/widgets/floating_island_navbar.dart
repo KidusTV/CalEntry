@@ -59,7 +59,9 @@ class FloatingIslandNavbar extends StatelessWidget {
                           selected: currentIndex == 1,
                           onTap: () => onChanged(1),
                         ),
-                        const SizedBox(width: 70), // Platz für Center Button
+                        _CenterButton(
+                          onTap: () => onChanged(2),
+                        ),
                         _NavItem(
                           icon: Icons.fastfood_rounded,
                           label: "Food",
@@ -80,12 +82,7 @@ class FloatingIslandNavbar extends StatelessWidget {
             ),
 
             // Schwebender Center Button (Scanner)
-            Positioned(
-              bottom: 12,
-              child: _CenterButton(
-                onTap: () => onChanged(2),
-              ),
-            ),
+
           ],
         ),
       ),
@@ -167,27 +164,22 @@ class _CenterButton extends StatelessWidget {
         onTap();
       },
       child: Container(
-        width: 64,
-        height: 64,
+        width: 55,
+        height: 55,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFF8A65), // Warmer Peach-Ton
-              Color(0xFFFF5722), // Strahlendes Orange
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFF5722).withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          color: Colors.white.withValues(alpha: 0.1) ,
+          // gradient: const LinearGradient(
+          //   begin: Alignment.topLeft,
+          //   end: Alignment.bottomRight,
+          //   colors: [
+          //     Color(0xFFFF8A65), // Warmer Peach-Ton
+          //     Color(0xFFFF5722), // Strahlendes Orange
+          //   ],
+          // ),
+
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Color(0xFFFFB36B),
             width: 2,
           ),
         ),
