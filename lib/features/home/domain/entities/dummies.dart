@@ -5,7 +5,7 @@ import 'nutrient_entitiy.dart';
 final nutrients = [
   NutrientEntity(
     id: 'calories',
-    title: 'Calories',
+    title: 'Kalorien',
     shortLabel: 'kcal',
     current: 1842,
     target: 2400,
@@ -35,8 +35,8 @@ final nutrients = [
 
   NutrientEntity(
     id: 'fat',
-    title: 'Fat',
-    shortLabel: 'fat',
+    title: 'Fett',
+    shortLabel: 'Fett',
     current: 58,
     target: 70,
     unit: 'g',
