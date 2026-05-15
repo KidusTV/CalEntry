@@ -11,6 +11,7 @@ abstract final class AppTheme {
       textTheme: buildTextTheme(Brightness.light),
       splashFactory: NoSplash.splashFactory,
       useMaterial3: true,
+      // pageTransitionsTheme: pageTransitionsTheme
     );
   }
 
@@ -21,6 +22,16 @@ abstract final class AppTheme {
       textTheme: buildTextTheme(Brightness.dark),
       splashFactory: NoSplash.splashFactory,
       useMaterial3: true,
+      // pageTransitionsTheme: pageTransitionsTheme
     );
   }
 }
+
+// final pageTransitionsTheme = const PageTransitionsTheme(
+//
+//   builders: {
+//
+//     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+//     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+//   },
+// );

@@ -22,7 +22,7 @@ class ScrollCustomView extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> children = slivers.map((e) => SliverPadding(padding: EdgeInsets.only(left: padding.left, right: padding.right), sliver: e)).toList();
     children = join(children, SliverPadding(padding: EdgeInsets.symmetric(vertical: AppSpacing.md)));
-    children.insert(0,SliverPadding(padding: EdgeInsets.only(top: padding.top)));
+    // children.insert(0,SliverPadding(padding: EdgeInsets.only(top: padding.top)));
     children.add(SliverPadding(padding: EdgeInsets.only(bottom: padding.bottom)));
 
     return CustomScrollView(

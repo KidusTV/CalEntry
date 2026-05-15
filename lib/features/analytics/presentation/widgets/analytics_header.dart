@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_spacing.dart';
+
 class AnalyticsHeader extends StatelessWidget {
   const AnalyticsHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
+        mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        spacing: 8,
         children: [
           Text(
             'Analyse',
@@ -19,7 +24,6 @@ class AnalyticsHeader extends StatelessWidget {
               letterSpacing: -1.4,
             ),
           ),
-          SizedBox(height: 8),
           Text(
             'Deine Entwicklung der letzten Wochen.',
             style: TextStyle(

@@ -17,6 +17,9 @@ class BasePage extends StatelessWidget {
       case '/home':
         return 0;
 
+      case '/analytics':
+        return 1;
+
       case '/scanner':
         return 2;
 
@@ -38,6 +41,10 @@ class BasePage extends StatelessWidget {
     switch (index) {
       case 0:
         context.go('/home');
+        break;
+
+      case 1:
+        context.go('/analytics');
         break;
 
       case 2:

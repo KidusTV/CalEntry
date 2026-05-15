@@ -4,6 +4,7 @@ import 'package:calentry/features/nutrition/presentation/widgets/meal_overview_c
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/scroll_custom_view.dart';
 import '../../../steps/presentation/widgets/steps_view.dart';
 import '../../../water/presentation/widgets/water_input_card/water_input_card.dart';
@@ -12,10 +13,18 @@ import '../widgets/overview/overview_section.dart';
 
 class HomePageView extends StatefulWidget {
   final int dayOffset;
+  final String title;
+  final VoidCallback onNext;
+  final VoidCallback onPrevious;
+  final void Function(int) toOffset;
 
   const HomePageView({
     super.key,
     required this.dayOffset,
+    required this.title,
+    required this.onNext,
+    required this.onPrevious,
+    required this.toOffset,
   });
 
   @override
@@ -28,7 +37,6 @@ class _HomePageViewState extends State<HomePageView> {
   @override
   void initState() {
     super.initState();
-
     focusedNutrient = nutrients.first;
   }
 
@@ -37,8 +45,19 @@ class _HomePageViewState extends State<HomePageView> {
     EdgeInsets padding = MediaQuery.paddingOf(context).copyWith(right: 0, left: 0);
 
     return ScrollCustomView(
-      padding: padding.copyWith(top: padding.top + AppSpacing.md, bottom: padding.bottom + AppSpacing.md * 2),
+      padding: padding.copyWith(
+        top: padding.top, // Padding wird jetzt von der SliverAppBar behandelt
+        bottom: padding.bottom + AppSpacing.md * 2,
+      ),
       slivers: [
+        // Die neue SliverAppBar
+        SliverCustomAppBar(
+          title: widget.title,
+          previous: widget.onPrevious,
+          next: widget.onNext,
+          toOffset: widget.toOffset,
+        ),
+
         SliverToBoxAdapter(
           child: HomeItem(
             child: OverviewSection(
@@ -51,7 +70,7 @@ class _HomePageViewState extends State<HomePageView> {
                   focusedNutrient = nutrient;
                 });
               },
-            )
+            ),
           ),
         ),
         SliverToBoxAdapter(
@@ -66,12 +85,14 @@ class _HomePageViewState extends State<HomePageView> {
           )),
         ),
         SliverToBoxAdapter(
-          child: HomeItem(child: WaterInputCard(
-              dayOffset: widget.dayOffset
-          )),
+          child: HomeItem(
+            child: WaterInputCard(dayOffset: widget.dayOffset),
+          ),
         ),
         SliverToBoxAdapter(
-          child: HomeItem(child: StepsCard(dayOffset: widget.dayOffset)),
+          child: HomeItem(
+            child: StepsCard(dayOffset: widget.dayOffset),
+          ),
         ),
       ],
     );

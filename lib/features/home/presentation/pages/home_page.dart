@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/app_bar.dart';
-import '../../../scanner/presentation/pages/scanner_page.dart';
 import 'home_page_view.dart';
 import 'package:intl/intl.dart';
 
@@ -10,7 +8,6 @@ String resolveTitle(DateTime baseDate, int offset) {
 
   Intl.defaultLocale = 'de_DE';
 
-  String topTitle;
   final sameYear = date.year == DateTime.now().year;
 
   switch (offset) {
@@ -37,13 +34,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   static const int baseIndex = 10000;
-
   int currentIndex = baseIndex;
-
   int get offset => currentIndex - baseIndex;
-
   DateTime baseDate = DateTime.now();
 
   void onPageChanged(int index) {
@@ -53,7 +46,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   final PageController _controller = PageController(initialPage: baseIndex);
-
 
   void next() {
     _controller.nextPage(
@@ -77,38 +69,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final pages = [
-    const HomePage(),
-    null, //const SearchPage(),
-    const ScannerPage(),
-    null,
-    null // const ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: CustomAppBar(
-          title: resolveTitle(baseDate, offset),
-          next: next,
-          toOffset: toOffset,
-          previous: previous,
-        ),
-      ),
       body: PageView.builder(
         controller: _controller,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: onPageChanged,
-
         itemBuilder: (context, index) {
           final dayOffset = index - baseIndex;
-          return HomePageView(dayOffset: dayOffset);
+          return HomePageView(
+            dayOffset: dayOffset,
+            title: resolveTitle(baseDate, dayOffset),
+            onNext: next,
+            onPrevious: previous,
+            toOffset: toOffset,
+          );
         },
-      )
+      ),
     );
   }
 }
