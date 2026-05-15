@@ -46,7 +46,7 @@ class _HomePageViewState extends State<HomePageView> {
 
     return ScrollCustomView(
       padding: padding.copyWith(
-        top: padding.top, // Padding wird jetzt von der SliverAppBar behandelt
+        top: 0, // Padding wird jetzt von der SliverAppBar behandelt
         bottom: padding.bottom + AppSpacing.md * 2,
       ),
       slivers: [
