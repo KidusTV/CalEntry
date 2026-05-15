@@ -305,7 +305,7 @@ class _OverviewSectionState extends State<OverviewSection> with SingleTickerProv
               child: LinearProgressIndicator(
                 value: _progressAnim.value,
                 minHeight: 7,
-                color: const Color(0xFFFFB36B),
+                color: Colors.greenAccent,
                 backgroundColor: Colors.white.withOpacity(0.05),
               ),
             );

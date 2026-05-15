@@ -6,7 +6,7 @@ final nutrients = [
   NutrientEntity(
     id: 'calories',
     title: 'Kalorien',
-    shortLabel: 'kcal',
+    shortLabel: 'Kcal',
     current: 1842,
     target: 2400,
     unit: ' kcal',
@@ -16,7 +16,7 @@ final nutrients = [
   NutrientEntity(
     id: 'protein',
     title: 'Protein',
-    shortLabel: 'protein',
+    shortLabel: 'Protein',
     current: 132,
     target: 180,
     unit: 'g',
@@ -25,8 +25,8 @@ final nutrients = [
 
   NutrientEntity(
     id: 'carbs',
-    title: 'Carbs',
-    shortLabel: 'carbs',
+    title: 'Kohlenhydrate',
+    shortLabel: 'Carbs',
     current: 210,
     target: 260,
     unit: 'g',

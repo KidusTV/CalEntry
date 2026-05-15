@@ -89,7 +89,7 @@ class GoalBarItem extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(AppRadius.full),
                                 border: Border.all(
                                   color: isActive
-                                      ? const Color(0xFFFFB36B)
+                                      ? Colors.greenAccent
                                       : Colors.white.withOpacity(0.05),
                                 ),
                               ),

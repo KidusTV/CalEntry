@@ -179,7 +179,7 @@ class _CenterButton extends StatelessWidget {
           // ),
 
           border: Border.all(
-            color: Color(0xFFFFB36B),
+            color: Colors.greenAccent,
             width: 2,
           ),
         ),
