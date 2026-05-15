@@ -15,6 +15,21 @@ class ScannerPage extends StatefulWidget {
 
 class _ScannerPageState extends State<ScannerPage> {
   final controller = MobileScannerController();
+  MealType selectedMeal = MealType.snack; // Standardwert
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMeal = _getDefaultMealByTime();
+  }
+
+  MealType _getDefaultMealByTime() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 11) return MealType.breakfast;
+    if (hour >= 11 && hour < 16) return MealType.lunch;
+    if (hour >= 16 && hour < 22) return MealType.dinner;
+    return MealType.snack;
+  }
 
   @override
   void dispose() {
@@ -28,16 +43,26 @@ class _ScannerPageState extends State<ScannerPage> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: CameraScanner(controller: controller),
+            child: CameraScanner(
+              controller: controller,
+              // Wir geben die Mahlzeit mit zurück, wenn ein Code erkannt wird
+              // onResult: (code) {
+              //   Navigator.of(context).pop({
+              //     'code': code,
+              //     'meal': selectedMeal,
+              //   });
+              // },
+            ),
           ),
-          // Positioned.fill(
-          //   child: ColoredBox(
-          //     color: Colors.black,
-          //   ),
-          // ),
-          ScannerOverlay(),
+          const ScannerOverlay(),
           ScannerTopBar(
             controller: controller,
+            // selectedMeal: selectedMeal,
+            // onMealChanged: (meal) {
+            //   setState(() {
+            //     selectedMeal = meal;
+            //   });
+            // },
           ),
         ],
       ),
