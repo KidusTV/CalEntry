@@ -1,6 +1,5 @@
 import '../entities/daily_step_stats.dart';
 import '../repositories/steps_repository.dart';
-import 'package:async/async.dart';
 
 class GetDailyStepsUseCase {
   final StepsRepository repository;

@@ -1,4 +1,3 @@
-import 'package:calentry/core/constants/theme/app_text_theme.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/home/presentation/widgets/header_button.dart';

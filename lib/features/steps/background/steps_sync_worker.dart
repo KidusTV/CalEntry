@@ -2,7 +2,6 @@ import 'package:workmanager/workmanager.dart';
 
 import '../../../core/di/injection.dart';
 
-import '../domain/usecases/sync_steps_usecase.dart';
 
 const syncStepsTask = 'syncStepsTask';
 

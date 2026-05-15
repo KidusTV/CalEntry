@@ -1,9 +1,8 @@
 import 'dart:ui';
-
 import 'package:calentry/core/constants/app_radius.dart';
+import 'package:calentry/core/constants/app_spacing.dart';
 import 'package:flutter/material.dart';
-
-import '../constants/app_spacing.dart';
+import 'package:flutter/services.dart';
 
 class FloatingIslandNavbar extends StatelessWidget {
   final int currentIndex;
@@ -20,68 +19,71 @@ class FloatingIslandNavbar extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(
-          left: 24,
-          right: 24,
+          left: 16,
+          right: 16,
           bottom: AppSpacing.md,
         ),
         child: Stack(
+          alignment: Alignment.bottomCenter,
+          clipBehavior: Clip.none,
           children: [
+            // Der "Island" Hintergrund
             ClipRRect(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(32),
               child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 28,
-                  sigmaY: 28,
-                ),
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
-                  height: 86,
+                  height: 72,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    color: Colors.white.withValues(alpha: 0.06),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(32),
+                    color: Colors.white.withValues(alpha: 0.08),
+                    // border: Border.all(
+                    //   color: Colors.white.withValues(alpha: 0.12),
+                    //   width: 0.5,
+                    // ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _NavItem(
+                          icon: Icons.grid_view_rounded,
+                          label: "Home",
+                          selected: currentIndex == 0,
+                          onTap: () => onChanged(0),
+                        ),
+                        _NavItem(
+                          icon: Icons.bar_chart_rounded,
+                          label: "Stats",
+                          selected: currentIndex == 1,
+                          onTap: () => onChanged(1),
+                        ),
+                        const SizedBox(width: 70), // Platz für Center Button
+                        _NavItem(
+                          icon: Icons.fastfood_rounded,
+                          label: "Food",
+                          selected: currentIndex == 3,
+                          onTap: () => onChanged(3),
+                        ),
+                        _NavItem(
+                          icon: Icons.person_2_rounded,
+                          label: "Profile",
+                          selected: currentIndex == 4,
+                          onTap: () => onChanged(4),
+                        ),
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        blurRadius: 28,
-                        offset: const Offset(0, 14),
-                      ),
-                    ],
                   ),
                 ),
               ),
             ),
-            Container(
-              height: 86,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _NavItem(
-                    icon: Icons.home_rounded,
-                    selected: currentIndex == 0,
-                    onTap: () => onChanged(0),
-                  ),
-                  _NavItem(
-                    icon: Icons.insights_rounded,
-                    selected: currentIndex == 1,
-                    onTap: () => onChanged(1),
-                  ),
-                  _CenterButton(
-                    onTap: () => onChanged(2),
-                  ),
-                  _NavItem(
-                    icon: Icons.restaurant_menu_rounded,
-                    selected: currentIndex == 3,
-                    onTap: () => onChanged(3),
-                  ),
-                  _NavItem(
-                    icon: Icons.settings_rounded,
-                    selected: currentIndex == 4,
-                    onTap: () => onChanged(4),
-                  ),
-                ],
+
+            // Schwebender Center Button (Scanner)
+            Positioned(
+              bottom: 12,
+              child: _CenterButton(
+                onTap: () => onChanged(2),
               ),
             ),
           ],
@@ -93,11 +95,13 @@ class FloatingIslandNavbar extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
+  final String label;
   final bool selected;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.icon,
+    required this.label,
     required this.selected,
     required this.onTap,
   });
@@ -105,41 +109,50 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: RepaintBoundary(
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          scale: selected ? 1.15 : 1.0,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected
-                  ? Colors.white.withValues(alpha: 0.14)
-                  : Colors.transparent,
-            ),
-            child: Center(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 180),
-                opacity: selected ? 1.0 : 0.6,
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: Colors.white,
-                ),
+      onTap: () {
+        if (!selected) {
+          HapticFeedback.selectionClick();
+          onTap();
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 50,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: selected 
+                    ? Colors.white.withValues(alpha: 0.1) 
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: selected ? Colors.white : Colors.white.withValues(alpha: 0.4),
               ),
             ),
-          ),
+            if (selected)
+              Container(
+                margin: const EdgeInsets.only(top: 4),
+                width: 4,
+                height: 4,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 }
-
 
 class _CenterButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -149,48 +162,39 @@ class _CenterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Transform.translate(
-        offset: const Offset(0, -20),
-        child: Container(
-          width: 74,
-          height: 74,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFFFC27A),
-                Color(0xFFFF6B4A),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0x55FF7A4A),
-                blurRadius: 30,
-                offset: const Offset(0, 14),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
-              ),
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFFF8A65), // Warmer Peach-Ton
+              Color(0xFFFF5722), // Strahlendes Orange
             ],
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.25),
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF5722).withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
-            child: const Icon(
-              Icons.qr_code_scanner_rounded,
-              color: Colors.white,
-              size: 30,
-            ),
+          ],
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 2,
           ),
+        ),
+        child: const Icon(
+          Icons.qr_code_scanner_rounded,
+          color: Colors.white,
+          size: 28,
         ),
       ),
     );

@@ -4,11 +4,7 @@ import '../../../../core/database/app_database.dart';
 import '../models/water_entry_model.dart';
 import '../models/water_goal_model.dart';
 
-import 'package:drift/drift.dart';
 
-import '../../../../core/database/app_database.dart';
-import '../models/water_entry_model.dart';
-import '../models/water_goal_model.dart';
 
 /// Einzige Stelle, die direkt mit Drift / PostgreSQL spricht.
 /// Alle anderen Schichten kennen nur Models oder Entities.

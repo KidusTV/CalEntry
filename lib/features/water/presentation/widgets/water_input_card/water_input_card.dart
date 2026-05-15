@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:calentry/features/water/presentation/widgets/water_input_card/widgets/label.dart';
+import 'package:calentry/features/water/presentation/widgets/water_input_card/widgets/picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -15,17 +17,6 @@ import 'physics/water_physics.dart';
 import 'widgets/circle_button.dart';
 import 'widgets/water_circle.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// WaterInputCard
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Haupt-Widget des interaktiven Wasserkreises.
-///
-/// [dayOffset] steuert welcher Tag angezeigt wird:
-///   0  = heute, -1 = gestern, +1 = morgen, usw.
-///
-/// Der Eltern-Widget (z. B. die PageView-Page) übergibt den Offset;
-/// alle Lese- und Schreiboperationen verwenden ihn konsistent.
 class WaterInputCard extends ConsumerStatefulWidget {
   final int dayOffset;
 
@@ -74,17 +65,18 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
   bool   _isFull         = false;
   int    _displayedMl    = 0;
 
-  // ── Kurzreferenz auf den aktuellen dayOffset ──────────────────────────────
-  // Über widget.dayOffset abrufbar, aber als lokale Kopie für den Sensor-
-  // Callback (läuft außerhalb des build-Kontexts).
+  // ── Picker-State ──────────────────────────────────────────────────────────
+  bool _isPickerActive = false;
+  FixedExtentScrollController? _pickerController;
+  int _pickerTemporaryValue = 0;
+
+
   int get _dayOffset => widget.dayOffset;
 
   @override
   void initState() {
     super.initState();
-
     _ticker = Ticker(_onFrame)..start();
-
     _accelSub = accelerometerEventStream(
       samplingPeriod: SensorInterval.gameInterval,
     ).listen((event) {
@@ -94,46 +86,35 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
     });
   }
 
-  // ── didUpdateWidget: wenn der PageView auf einen anderen Tag wechselt ─────
-  // Das Widget wird nicht neu erstellt — nur der dayOffset ändert sich.
-  // Der Progress muss sofort auf den neuen Tageswert springen (kein Fade-over).
   @override
   void didUpdateWidget(WaterInputCard old) {
     super.didUpdateWidget(old);
     if (old.dayOffset != widget.dayOffset) {
-      // Physik-State zurücksetzen, damit die Animation für den neuen Tag
-      // sauber von 0 (oder dem tatsächlichen Wert) startet.
       _displayedProgress = 0.0;
       _progressVelocity  = 0.0;
       _displayedMl       = 0;
       _goalFlashT        = 0.0;
       _wasGoalReached    = false;
+      _isPickerActive    = false;
     }
   }
-
-  // ── Frame-Loop ────────────────────────────────────────────────────────────
 
   void _onFrame(Duration elapsed) {
     final dt     = (elapsed - _lastElapsed).inMicroseconds / 1e6;
     _lastElapsed = elapsed;
     final safeDt = dt.clamp(0.0, 0.05);
 
-    // Progress-Feder
     final progressResult = integrateProgress(
       target: _targetProgress,
       displayed: _displayedProgress,
       velocity: _progressVelocity,
       dt: safeDt,
     );
-
     _displayedProgress = progressResult.$1;
     _progressVelocity  = progressResult.$2;
 
-    // Ziel-Flash
     final goalNow = _displayedProgress >= 0.999;
-    if (goalNow && !_wasGoalReached) {
-      _goalFlashT = 0.001;
-    }
+    if (goalNow && !_wasGoalReached) _goalFlashT = 0.001;
     _wasGoalReached = goalNow;
     _isFull         = goalNow;
 
@@ -142,106 +123,87 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
       if (_goalFlashT >= 1.0) _goalFlashT = 0.0;
     }
 
-    // Neigung
     final tiltResult = integrateSpring(
-      target: -_targetTilt,
-      angle: _tiltAngle,
-      velocity: _tiltVelocity,
-      maxAngle: kMaxTilt,
-      wrapAngle: false,
-      dt: safeDt,
+      target: -_targetTilt, angle: _tiltAngle, velocity: _tiltVelocity,
+      maxAngle: kMaxTilt, wrapAngle: false, dt: safeDt,
     );
-
     _tiltAngle    = tiltResult.$1;
     _tiltVelocity = tiltResult.$2;
 
-    // Rotation
     final rollResult = integrateSpring(
-      target: _targetRoll,
-      angle: _rollAngle,
-      velocity: _rollVelocity,
-      maxAngle: kMaxRoll,
-      wrapAngle: true,
-      dt: safeDt,
+      target: _targetRoll, angle: _rollAngle, velocity: _rollVelocity,
+      maxAngle: kMaxRoll, wrapAngle: true, dt: safeDt,
     );
-
     _rollAngle    = rollResult.$1;
     _rollVelocity = rollResult.$2;
 
-    // Sichtbare Rotation
     final rollTarget = _isFull ? _rollAngle : 0.0;
     var diff = rollTarget - _visibleRollAngle;
     while (diff >  pi) diff -= 2 * pi;
     while (diff < -pi) diff += 2 * pi;
     _visibleRollAngle += diff * min(1.0, safeDt * 6.0);
 
-    // Welle
     final sloshing = _tiltVelocity.abs();
     _wavePhase = (_wavePhase + safeDt * (0.5 + sloshing * 0.2)) % (2 * pi);
 
-    // Blasen
     for (int i = _bubbles.length - 1; i >= 0; i--) {
       _bubbles[i].life += safeDt * (0.28 + _rng.nextDouble() * 0.15);
       if (_bubbles[i].life >= 1.0) _bubbles.removeAt(i);
     }
-    if (_rng.nextDouble() > 0.88 &&
-        _displayedProgress > 0 &&
-        _bubbles.length < 18) {
-      _bubbles.add(Bubble(
-        x:    _rng.nextDouble(),
-        life: 0.0,
-        size: _rng.nextDouble() * 3 + 2,
-      ));
+    if (_rng.nextDouble() > 0.88 && _displayedProgress > 0 && _bubbles.length < 18) {
+      _bubbles.add(Bubble(x: _rng.nextDouble(), life: 0.0, size: _rng.nextDouble() * 3 + 2));
     }
-
     setState(() {});
   }
-
-  // ── Stats aus Stream übernehmen ───────────────────────────────────────────
 
   void _applyStats(DailyWaterStats stats) {
     _targetProgress = stats.progress;
     _displayedMl    = stats.consumed.toInt();
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-
   Future<void> _addDrink(double amount) async {
-    await ref.read(waterControllerProvider).addDrink(
-      amount,
-      dayOffset: _dayOffset,
-    );
+    await ref.read(waterControllerProvider).addDrink(amount, dayOffset: _dayOffset);
     HapticFeedback.lightImpact();
   }
 
   Future<void> _removeDrink(double amount) async {
-    await ref.read(waterControllerProvider).removeDrink(
-      amount,
-      dayOffset: _dayOffset,
-    );
+    await ref.read(waterControllerProvider).removeDrink(amount, dayOffset: _dayOffset);
     HapticFeedback.lightImpact();
   }
 
-  // Future<void> _removeLast() async {
-  //   await ref.read(waterControllerProvider).removeLastDrink(
-  //     dayOffset: _dayOffset,
-  //   );
-  //   HapticFeedback.lightImpact();
-  // }
+  void _togglePicker() {
+    if (!_isPickerActive) {
+      setState(() {
+        _isPickerActive = true;
+        _pickerTemporaryValue = _displayedMl;
+        _pickerController = FixedExtentScrollController(initialItem: _displayedMl ~/ 50);
+      });
+      HapticFeedback.mediumImpact();
+    } else {
+      final difference = _pickerTemporaryValue - _displayedMl;
+      if (difference != 0) {
+        if (difference > 0) _addDrink(difference.toDouble());
+        else _removeDrink(difference.abs().toDouble());
+      }
+      setState(() {
+        _isPickerActive = false;
+        _pickerController?.dispose();
+        _pickerController = null;
+      });
+      HapticFeedback.lightImpact();
+    }
+  }
 
   @override
   void dispose() {
     _ticker?.dispose();
     _accelSub?.cancel();
+    _pickerController?.dispose();
     super.dispose();
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
-    // waterStatsProvider(dayOffset) → family StreamProvider
-    // Jede Seite der PageView hat ihren eigenen Provider-Slot.
     final statsAsync = ref.watch(waterStatsProvider(_dayOffset));
     statsAsync.whenData(_applyStats);
 
@@ -249,113 +211,43 @@ class _WaterInputCardState extends ConsumerState<WaterInputCard> {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        CircleButton(
-          icon:  Icons.remove,
-          onTap: () => _removeDrink(250),
-        ),
-
+        CircleButton(icon: Icons.remove, onTap: () => _removeDrink(250)),
         GestureDetector(
-          onTap: () {
-            showWaterPicker(
-              context,
-              onChanged: (value) {
-                // Wasser aktualisieren
-              },
-            );
-          },
+          onTap: _togglePicker,
           child: WaterCircle(
             displayedProgress: _displayedProgress,
-            wavePhase:         _wavePhase,
-            tiltAngle:         _tiltAngle,
-            rollAngle:         _visibleRollAngle,
-            ringOpacity:       _ringOpacity,
-            bubbles:           _bubbles,
-            waterMl:           _displayedMl,
+            wavePhase: _wavePhase,
+            tiltAngle: _tiltAngle,
+            rollAngle: _visibleRollAngle,
+            ringOpacity: _ringOpacity,
+            bubbles: _bubbles,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.9, end: 1.0).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: _isPickerActive ? WaterPicker(
+                pickerTemporaryValue: _pickerTemporaryValue,
+                pickerController: _pickerController!,
+                onSelectedItemChanged: (index) {
+                  setState(() => _pickerTemporaryValue = index * 50);
+                  HapticFeedback.selectionClick();
+                },
+
+              ) : WaterLabel(displayedMl: _displayedMl),
+            ),
           ),
         ),
-
-        CircleButton(
-          icon:  Icons.add,
-          onTap: () => _addDrink(250),
-        ),
+        CircleButton(icon: Icons.add, onTap: () => _addDrink(250)),
       ],
     );
   }
 
-  Future<void> showWaterPicker(BuildContext context, {required ValueChanged<int> onChanged}) async {
-    final controller = FixedExtentScrollController(initialItem: _displayedMl ~/ 50);
 
-    int currentValue = _displayedMl;
-
-    final selectedValue = await showGeneralDialog<int>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: "Water Picker",
-      barrierColor: Colors.black54,
-      pageBuilder: (_, __, ___) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Center(
-              child: SizedBox(
-                height: 250,
-                child: ListWheelScrollView.useDelegate(
-                  controller: controller,
-                  itemExtent: 60,
-                  perspective: 0.003,
-                  diameterRatio: 1.4,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) {
-                    setState(() {
-                      currentValue = index * 50;
-                    });
-
-                    onChanged(currentValue);
-                  },
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 61,
-                    builder: (context, index) {
-                      final value = index * 50;
-
-                      final selected = value == currentValue;
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context, value);
-                        },
-                        child: Center(
-                          child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 150),
-                            style: TextStyle(
-                              fontSize: selected ? 38 : 28,
-                              fontWeight: selected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                              color: selected
-                                  ? Colors.white
-                                  : Colors.white54,
-                            ),
-                            child: Text("$value"),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    if (selectedValue != null) {
-      final difference = selectedValue - _displayedMl;
-      if (difference > 0) {
-        _addDrink(difference.toDouble());
-
-      } else if (difference < 0) {
-        _removeDrink(difference.abs().toDouble());
-      }
-    }
-  }
 }

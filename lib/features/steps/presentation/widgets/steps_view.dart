@@ -4,11 +4,6 @@ import 'package:calentry/features/water/presentation/providers/water_providers.d
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:calentry/features/steps/presentation/widgets/providers.dart';
-import 'package:calentry/features/steps/domain/entities/daily_step_stats.dart';
-import 'package:calentry/features/water/presentation/providers/water_providers.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class StepsCard extends ConsumerStatefulWidget {
   final int dayOffset;

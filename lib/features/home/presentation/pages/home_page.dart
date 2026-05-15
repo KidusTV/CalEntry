@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_file.dart';
 
 import '../../../../core/widgets/app_bar.dart';
 import '../../../scanner/presentation/pages/scanner_page.dart';
@@ -104,6 +103,7 @@ class _HomePageState extends State<HomePage> {
         controller: _controller,
         physics: NeverScrollableScrollPhysics(),
         onPageChanged: onPageChanged,
+
         itemBuilder: (context, index) {
           final dayOffset = index - baseIndex;
           return HomePageView(dayOffset: dayOffset);

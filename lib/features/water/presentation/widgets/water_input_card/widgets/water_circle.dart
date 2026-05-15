@@ -1,23 +1,17 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-
 import '../painters/goal_ring_painter.dart';
 import '../painters/water_painter.dart';
 import '../physics/bubble.dart';
 
-/// Der animierte Wasserkreis mit Glasshintergrund, Wellen, Blasen,
-/// Ziel-Ring und zentriertem Label.
-///
-/// Rotiert von außen per [rollAngle] (wird von [WaterInputCard] übergeben).
 class WaterCircle extends StatelessWidget {
   final double displayedProgress;
   final double wavePhase;
   final double tiltAngle;
-  final double rollAngle;       // Gesamtrotation des Kreises
-  final double ringOpacity;     // 0..1 für GoalRingPainter
+  final double rollAngle;       
+  final double ringOpacity;     
   final List<Bubble> bubbles;
-  final int waterMl;            // Anzeigewert im Label
+  final Widget child; 
 
   const WaterCircle({
     super.key,
@@ -27,16 +21,18 @@ class WaterCircle extends StatelessWidget {
     required this.rollAngle,
     required this.ringOpacity,
     required this.bubbles,
-    required this.waterMl,
+    required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
+      width: 120, 
       height: 120,
       child: Stack(
+        alignment: Alignment.center,
         children: [
+          // Hintergrund-Glas
           Container(
             height: 120,
             width: 120,
@@ -52,7 +48,7 @@ class WaterCircle extends StatelessWidget {
             ),
           ),
 
-
+          // Wasser-Effekt
           Transform.rotate(
             angle: rollAngle,
             child: CustomPaint(
@@ -66,28 +62,25 @@ class WaterCircle extends StatelessWidget {
             ),
           ),
 
-
+          // Ziel-Ring (Glow)
           if (ringOpacity > 0.0)
             CustomPaint(
               size: const Size(120, 120),
               painter: GoalRingPainter(opacity: ringOpacity),
             ),
 
-
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.water_drop, color: Colors.white),
-                const SizedBox(height: 4),
-                Text(
-                  '$waterMl ml',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+          // Zentraler Inhalt
+          // ClipOval maskiert alles exakt auf Kreisform.
+          // OverflowBox erlaubt dem Picker, horizontal breiter zu sein,
+          // damit die Zahlen nicht am Rand "gequetscht" werden.
+          ClipOval(
+            child: SizedBox(
+              width: 120,
+              height: 120,
+              child: OverflowBox(
+                maxWidth: 200, // Picker darf breiter sein
+                child: child,
+              ),
             ),
           ),
         ],
